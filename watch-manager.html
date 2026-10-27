@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#11111B" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Waveshare S3 Watch Manager</title>
+  <style>
+    :root {
+      --bg: #11111b;
+      --card: #181825;
+      --card-alt: #1e1e2e;
+      --border: #313244;
+      --text: #cdd6f4;
+      --subtext: #a6adc8;
+      --blue: #89b4fa;
+      --green: #a6e3a1;
+      --yellow: #f9e2af;
+      --purple: #cba6f7;
+      --red: #f38ba8;
+      --cyan: #00e5ff;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 14px;
+      max-width: 540px;
+      margin: 0 auto 48px auto;
+      line-height: 1.4;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    .brand h1 {
+      font-size: 1.08rem;
+      color: var(--blue);
+      letter-spacing: 0.3px;
+    }
+    .brand p {
+      font-size: 0.78rem;
+      color: var(--subtext);
+    }
+    .status-pill {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(243, 139, 168, 0.16);
+      color: var(--red);
+      border: 1px solid var(--red);
+      white-space: nowrap;
+    }
+    .status-pill.connected {
+      background: rgba(166, 227, 161, 0.16);
+      color: var(--green);
+      border-color: var(--green);
+    }
+    .card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--blue);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .warning-box {
+      background: rgba(249, 226, 175, 0.12);
+      border: 1.5px solid var(--yellow);
+      color: var(--yellow);
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 0.82rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .warning-box code {
+      background: rgba(0, 0, 0, 0.35);
+      padding: 2px 6px;
+      border-radius: 6px;
+      word-break: break-all;
+      color: var(--cyan);
+    }
+    .btn-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .btn-row-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .btn-row-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 13px;
+      padding: 11px 12px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: #11111b;
+      background: var(--blue);
+    }
+    button:active {
+      transform: scale(0.97);
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .btn-connect {
+      width: 100%;
+      padding: 13px;
+      font-size: 0.96rem;
+      background: var(--green);
+      margin-bottom: 8px;
+    }
+    .btn-disconnect {
+      background: var(--red);
+    }
+    .btn-purple { background: var(--purple); }
+    .btn-yellow { background: var(--yellow); }
+    .btn-cyan   { background: var(--cyan); }
+    .btn-green  { background: var(--green); }
+    .btn-red    { background: var(--red); }
+    .btn-dark   {
+      background: var(--card-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+    input[type="text"], input[type="number"], input[type="time"], select {
+      width: 100%;
+      background: var(--card-alt);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--blue);
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.84rem;
+      color: var(--subtext);
+      padding: 6px 0;
+    }
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--yellow);
+    }
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .metric-box {
+      background: var(--card-alt);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 10px;
+    }
+    .metric-label {
+      font-size: 0.72rem;
+      color: var(--subtext);
+    }
+    .metric-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-top: 2px;
+    }
+    #logBox {
+      background: #0b0b12;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      height: 185px;
+      overflow-y: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      color: var(--text);
+    }
+    .log-in  { color: var(--green); margin-bottom: 4px; }
+    .log-out { color: var(--blue); margin-bottom: 4px; }
+    .log-sys { color: var(--yellow); margin-bottom: 4px; }
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--card-alt);
+      border: 2px solid var(--purple);
+      color: var(--text);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      display: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>Waveshare-S3-Watch</h1>
+      <p id="subStatus">Pixel Web Bluetooth Companion</p>
+    </div>
+    <div id="connBadge" class="status-pill">DISCONNECTED</div>
+  </header>
+
+  <div id="secWarning" class="warning-box">
+    <strong>Chrome Web Bluetooth Notice:</strong><br/>
+    Chrome requires either <code>http://localhost</code>, <code>https://</code>, or enabling this flag for local Wi-Fi IPs:<br/>
+    1. Open <code>chrome://flags/#unsafely-treat-insecure-origin-as-secure</code><br/>
+    2. Add <code id="curOrigin"></code>, set to <strong>Enabled</strong>, and relaunch Chrome.
+  </div>
+
+  <!-- Connection & Auto-Sync Card -->
+  <div class="card">
+    <button id="btnConnect" class="btn-connect" onclick="toggleConnection()">
+      Connect to Waveshare-S3-Watch
+    </button>
+    <div class="btn-row">
+      <button onclick="syncPhoneTime()" class="btn-cyan">Sync Pixel Clock</button>
+      <button onclick="syncLiveWeather()" class="btn-yellow">Push Live Weather</button>
+    </div>
+    <div class="toggle-row" style="margin-top: 8px;">
+      <span>Auto-reply to Watch Sync &amp; keep screen awake</span>
+      <input type="checkbox" id="chkAutoSync" checked />
+    </div>
+  </div>
+
+  <!-- Send Notification / Request / Call Card -->
+  <div class="card">
+    <div class="card-title">
+      <span>Send Message / Popup to Watch</span>
+    </div>
+    <div class="input-group">
+      <div class="input-row">
+        <input type="text" id="inpTitle" placeholder="Title (e.g. Pixel / WhatsApp)" value="Google Pixel" style="flex: 0.45;" />
+        <input type="text" id="inpMsg" placeholder="Message or Question..." value="Ready to head out?" style="flex: 0.55;" />
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-purple" onclick="sendNotifyPopup()">Send Alert Popup</button>
+      <button class="btn-green" onclick="sendInteractiveReq()">Ask Accept / Reject</button>
+      <button class="btn-yellow" onclick="sendCallAlert()">Simulate Call</button>
+      <button class="btn-dark" onclick="sendChatMsg()">Log Chat Text</button>
+    </div>
+  </div>
+
+  <!-- Watch Face & Page Switcher -->
+  <div class="card">
+    <div class="card-title">
+      <span>Watch Faces (Tap to Switch)</span>
+      <span id="lblActiveFace" style="color: var(--subtext); font-size: 0.76rem;">Face: --</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn-dark" onclick="sendCmd('FACE:0')">0: Modern Digital</button>
+      <button class="btn-dark" onclick="sendCmd('FACE:1')">1: Sundial</button>
+      <button class="btn-dark" onclick="sendCmd('FACE:2')">2: Neon Cyber</button>
+      <button class="btn-dark" onclick="sendCmd('FACE:3')">3: Analog Classic</button>
+      <button class="btn-dark" onclick="sendCmd('FACE:4')">4: ASCII Matrix</button>
+      <button class="btn-dark" onclick="sendCmd('FACE:5')">5: Weather Station</button>
+    </div>
+    <button class="btn-dark" style="width:100%; margin-top:8px;" onclick="sendCmd('FACE:6')">6: AMOLED Sport Arc</button>
+
+    <div class="card-title" style="margin-top: 14px; margin-bottom: 6px;">
+      <span>Switch Watch Menu Page</span>
+    </div>
+    <div class="btn-row-4">
+      <button class="btn-dark" onclick="sendCmd('PAGE:0')">Clock</button>
+      <button class="btn-dark" onclick="sendCmd('PAGE:1')">Tools</button>
+      <button class="btn-dark" onclick="sendCmd('PAGE:2')">BT Log</button>
+      <button class="btn-dark" onclick="sendCmd('PAGE:3')">Settings</button>
+    </div>
+  </div>
+
+  <!-- Brightness, Alarm, Timer & Find Watch -->
+  <div class="card">
+    <div class="card-title">
+      <span>Hardware Controls &amp; Tools</span>
+      <span id="lblBright">80%</span>
+    </div>
+    <div class="slider-wrap">
+      <span style="font-size:0.8rem; color:var(--subtext);">Brightness</span>
+      <input type="range" id="rngBright" min="10" max="100" step="5" value="80"
+             oninput="document.getElementById('lblBright').textContent = this.value + '%'"
+             onchange="sendCmd('BRIGHT:' + this.value)" />
+    </div>
+
+    <div class="input-row" style="margin-top: 10px;">
+      <input type="time" id="inpAlarm" value="07:30" />
+      <button class="btn-blue" onclick="setWatchAlarm()">Set Alarm</button>
+      <button class="btn-dark" onclick="sendCmd('ALARM:OFF')">Off</button>
+    </div>
+
+    <div class="btn-row-3" style="margin-top: 8px;">
+      <button class="btn-dark" onclick="sendCmd('TIMER:60')">1m Timer</button>
+      <button class="btn-dark" onclick="sendCmd('TIMER:300')">5m Timer</button>
+      <button class="btn-red" onclick="sendCmd('FIND')">Ping Watch</button>
+    </div>
+  </div>
+
+  <!-- Live Computational Boundaries & Diagnostics -->
+  <div class="card">
+    <div class="card-title">
+      <span>Watch Computational Boundaries</span>
+      <button class="btn-cyan" style="padding: 5px 10px; font-size: 0.75rem;" onclick="requestDiagnostics()">Refresh DIAG</button>
+    </div>
+    <div class="telemetry-grid">
+      <div class="metric-box">
+        <div class="metric-label">Internal SRAM (Largest)</div>
+        <div class="metric-val" id="metSram">-- KB</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Octal PSRAM Free</div>
+        <div class="metric-val" id="metPsram">-- KB</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Loop Stack Margin</div>
+        <div class="metric-val" id="metStack">-- B</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Battery / Max Loop</div>
+        <div class="metric-val" id="metBatt">--%</div>
+      </div>
+    </div>
+
+    <div class="input-row" style="margin-bottom: 8px;">
+      <input type="text" id="inpRawCmd" placeholder="Raw command (e.g. STATUS, DIAG, HELP)" />
+      <button onclick="sendRawInput()">Send</button>
+    </div>
+    <div id="logBox"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const DEVICE_NAME  = "Waveshare-S3-Watch";
+    const SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+    const RX_UUID      = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+    const TX_UUID      = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+    const BATT_SERVICE = 0x180f;
+
+    let bleDevice = null;
+    let bleServer = null;
+    let rxChar = null;
+    let txChar = null;
+    let wakeLock = null;
+    let rxBuffer = "";
+
+    // Check if Web Bluetooth is available in current context
+    window.addEventListener("DOMContentLoaded", () => {
+      if (!navigator.bluetooth) {
+        const warn = document.getElementById("secWarning");
+        document.getElementById("curOrigin").textContent = window.location.origin;
+        warn.style.display = "block";
+        logLine("Web Bluetooth API requires HTTPS, localhost, or the Chrome flag above.", "sys");
+      } else {
+        logLine("Web Bluetooth ready. Tap 'Connect to Waveshare-S3-Watch'.", "sys");
+      }
+    });
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.style.display = "block";
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.style.display = "none"; }, 4000);
+    }
+
+    function logLine(text, type = "sys") {
+      const box = document.getElementById("logBox");
+      const div = document.createElement("div");
+      div.className = type === "in" ? "log-in" : (type === "out" ? "log-out" : "log-sys");
+      const now = new Date().toLocaleTimeString([], { hour12: false });
+      const prefix = type === "in" ? "WATCH -> " : (type === "out" ? "PIXEL -> " : "");
+      div.textContent = `[${now}] ${prefix}${text}`;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function requestWakeLock() {
+      if ("wakeLock" in navigator && document.getElementById("chkAutoSync").checked) {
+        try {
+          wakeLock = await navigator.wakeLock.request("screen");
+        } catch (_) {}
+      }
+    }
+
+    async function toggleConnection() {
+      if (bleDevice && bleDevice.gatt.connected) {
+        bleDevice.gatt.disconnect();
+        return;
+      }
+      await connectWatch();
+    }
+
+    async function connectWatch() {
+      try {
+        logLine("Scanning for Waveshare-S3-Watch...", "sys");
+        bleDevice = await navigator.bluetooth.requestDevice({
+          filters: [
+            { namePrefix: "Waveshare" },
+            { services: [SERVICE_UUID] }
+          ],
+          optionalServices: [SERVICE_UUID, BATT_SERVICE]
+        });
+
+        bleDevice.addEventListener("gattserverdisconnected", onWatchDisconnected);
+
+        logLine("Connecting to GATT server...", "sys");
+        bleServer = await bleDevice.gatt.connect();
+
+        const service = await bleServer.getPrimaryService(SERVICE_UUID);
+        rxChar = await service.getCharacteristic(RX_UUID);
+        txChar = await service.getCharacteristic(TX_UUID);
+
+        await txChar.startNotifications();
+        txChar.addEventListener("characteristicvaluechanged", onWatchNotification);
+
+        updateConnUI(true);
+        await requestWakeLock();
+        logLine("Connected to " + bleDevice.name + "!", "sys");
+        showToast("Connected to Watch!");
+
+        // Wait 900ms after GATT discovery, then auto-sync time & fetch diagnostics
+        setTimeout(async () => {
+          if (document.getElementById("chkAutoSync").checked) {
+            await syncPhoneTime();
+          }
+          setTimeout(() => sendCmd("STATUS"), 350);
+          setTimeout(() => sendCmd("DIAG"), 700);
+        }, 900);
+
+      } catch (err) {
+        logLine("Connect error: " + err.message, "sys");
+      }
+    }
+
+    function onWatchDisconnected() {
+      updateConnUI(false);
+      rxChar = null;
+      txChar = null;
+      logLine("Watch disconnected.", "sys");
+      showToast("Watch Disconnected");
+    }
+
+    function updateConnUI(connected) {
+      const badge = document.getElementById("connBadge");
+      const btn = document.getElementById("btnConnect");
+      if (connected) {
+        badge.textContent = "CONNECTED";
+        badge.classList.add("connected");
+        btn.textContent = "Disconnect Watch";
+        btn.classList.add("btn-disconnect");
+      } else {
+        badge.textContent = "DISCONNECTED";
+        badge.classList.remove("connected");
+        btn.textContent = "Connect to Waveshare-S3-Watch";
+        btn.classList.remove("btn-disconnect");
+      }
+    }
+
+    async function onWatchNotification(event) {
+      const chunk = new TextDecoder().decode(event.target.value);
+      rxBuffer += chunk;
+      let lines = rxBuffer.split(/\r?\n/);
+      rxBuffer = lines.pop() || "";
+
+      for (const raw of lines) {
+        const msg = raw.trim();
+        if (!msg) continue;
+        logLine(msg, "in");
+        handleWatchMessage(msg);
+      }
+    }
+
+    async function handleWatchMessage(msg) {
+      const autoSync = document.getElementById("chkAutoSync").checked;
+
+      // 1. Watch requested time/status sync
+      if (msg.startsWith("REQ:SYNC") && autoSync) {
+        await syncPhoneTime();
+        return;
+      }
+
+      // 2. Watch requested weather refresh
+      if (msg.startsWith("REQ:WEATHER") && autoSync) {
+        await syncLiveWeather();
+        return;
+      }
+
+      // 3. User tapped Accept / Reject or Answer / Decline on the watch modal
+      if (msg.startsWith("RESP:ACCEPTED")) {
+        showToast("Watch User ACCEPTED: " + msg.replace("RESP:ACCEPTED:", ""));
+      } else if (msg.startsWith("RESP:REJECTED")) {
+        showToast("Watch User REJECTED: " + msg.replace("RESP:REJECTED:", ""));
+      } else if (msg.startsWith("CALL:ANSWERED")) {
+        showToast("Watch User ANSWERED Call!");
+      } else if (msg.startsWith("CALL:DECLINED")) {
+        showToast("Watch User DECLINED Call");
+      }
+
+      // 4. Parse BOUNDARIES telemetry response
+      // Format: BOUNDARIES IntSRAM:172KB(blk:110KB,min:158KB) PSRAM:8120KB Stack:19800B MaxLoop:14ms Fails:0
+      if (msg.startsWith("BOUNDARIES ")) {
+        const sramMatch  = msg.match(/IntSRAM:(\d+KB\(blk:\d+KB)/);
+        const psramMatch = msg.match(/PSRAM:(\d+KB)/);
+        const stackMatch = msg.match(/Stack:(\d+B)/);
+        const loopMatch  = msg.match(/MaxLoop:(\d+ms)/);
+        if (sramMatch)  document.getElementById("metSram").textContent  = sramMatch[1] + ")";
+        if (psramMatch) document.getElementById("metPsram").textContent = psramMatch[1];
+        if (stackMatch) document.getElementById("metStack").textContent = stackMatch[1];
+        if (loopMatch)  document.getElementById("metBatt").textContent  = (document.getElementById("metBatt").dataset.batt || "--%") + " / " + loopMatch[1];
+      }
+
+      // 5. Parse STATUS telemetry response
+      // Format: STATUS 2026-10-27 12:30:00 BATT:96%(4150mV) FACE:0 STEPS:8432
+      if (msg.startsWith("STATUS ")) {
+        const battMatch = msg.match(/BATT:(\d+%)/);
+        const faceMatch = msg.match(/FACE:(\d+)/);
+        if (battMatch) {
+          document.getElementById("metBatt").dataset.batt = battMatch[1];
+          document.getElementById("metBatt").textContent = battMatch[1];
+        }
+        if (faceMatch) {
+          document.getElementById("lblActiveFace").textContent = "Active Face: #" + faceMatch[1];
+        }
+      }
+    }
+
+    async function sendCmd(cmd) {
+      if (!rxChar) {
+        showToast("Connect to the watch first!");
+        return;
+      }
+      try {
+        const clean = cmd.trim();
+        const bytes = new TextEncoder().encode(clean + "\n");
+        if (rxChar.properties.writeWithoutResponse) {
+          await rxChar.writeValueWithoutResponse(bytes);
+        } else {
+          await rxChar.writeValue(bytes);
+        }
+        logLine(clean, "out");
+      } catch (err) {
+        logLine("Write failed: " + err.message, "sys");
+      }
+    }
+
+    async function syncPhoneTime() {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      const stamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
+                    `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      await sendCmd(`TIME:${stamp}`);
+    }
+
+    function weatherCodeToText(code) {
+      if (code === 0) return "Clear Sky";
+      if (code <= 2) return "Partly Cloudy";
+      if (code === 3) return "Overcast";
+      if (code <= 48) return "Foggy";
+      if (code <= 57) return "Drizzle";
+      if (code <= 67) return "Rainy";
+      if (code <= 77) return "Snowy";
+      if (code <= 82) return "Showers";
+      if (code >= 95) return "Thunderstorm";
+      return "Fair";
+    }
+
+    async function syncLiveWeather() {
+      logLine("Fetching live local weather for watch...", "sys");
+      try {
+        let lat = 37.7749, lon = -122.4194, city = "Local";
+        try {
+          const geoResp = await fetch("https://ipapi.co/json/");
+          if (geoResp.ok) {
+            const geo = await geoResp.json();
+            if (geo.latitude && geo.longitude) {
+              lat = geo.latitude;
+              lon = geo.longitude;
+              city = (geo.city || "Local").replace(/,/g, "");
+            }
+          }
+        } catch (_) {}
+
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m`;
+        const wResp = await fetch(url);
+        const wData = await wResp.json();
+        const cur = wData.current;
+        const tempC = Number(cur.temperature_2m).toFixed(1);
+        const cond = weatherCodeToText(cur.weather_code);
+        const hum = Math.round(cur.relative_humidity_2m || 50);
+        const wind = Number(cur.wind_speed_10m || 0).toFixed(1);
+
+        await sendCmd(`WEATHER:${tempC},${cond},${city},${hum},${wind}`);
+        showToast(`Synced Weather: ${tempC}°C ${cond}`);
+      } catch (err) {
+        logLine("Weather fetch error: " + err.message, "sys");
+      }
+    }
+
+    function sendNotifyPopup() {
+      const title = document.getElementById("inpTitle").value.trim() || "Pixel";
+      const msg = document.getElementById("inpMsg").value.trim() || "Hello from Pixel!";
+      sendCmd(`NOTIFY:${title}|${msg}`);
+    }
+
+    function sendInteractiveReq() {
+      const msg = document.getElementById("inpMsg").value.trim() || "Approve request?";
+      sendCmd(`REQ:${msg}`);
+    }
+
+    function sendCallAlert() {
+      const caller = document.getElementById("inpTitle").value.trim() || "Google Pixel";
+      sendCmd(`CALL:${caller}`);
+    }
+
+    function sendChatMsg() {
+      const msg = document.getElementById("inpMsg").value.trim();
+      if (msg) sendCmd(msg);
+    }
+
+    function setWatchAlarm() {
+      const val = document.getElementById("inpAlarm").value;
+      if (val) sendCmd(`ALARM:${val}`);
+    }
+
+    function requestDiagnostics() {
+      sendCmd("STATUS");
+      setTimeout(() => sendCmd("DIAG"), 250);
+    }
+
+    function sendRawInput() {
+      const inp = document.getElementById("inpRawCmd");
+      if (inp.value.trim()) {
+        sendCmd(inp.value.trim());
+        inp.value = "";
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "cpu": {
+    "fqbn": "esp32:esp32:esp32s3:PartitionScheme=huge_app,PSRAM=opi",
+    "name": "ESP32S3 Dev Module"
+  }
+}
